@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -44,6 +45,16 @@ public class UserController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @PostMapping("/find-or-create")
+    public ResponseEntity<User> findOrCreateUser(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        User user = userService.findOrCreateUser(email.trim().toLowerCase());
+        return ResponseEntity.ok(user);
     }
     
     @PutMapping("/{id}")

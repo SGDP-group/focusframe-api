@@ -32,6 +32,13 @@ public class UserService {
         }
         return userRepository.save(user);
     }
+
+    public User findOrCreateUser(String email) {
+        return userRepository.findByEmail(email).orElseGet(() -> {
+            User newUser = new User(email);
+            return userRepository.save(newUser);
+        });
+    }
     
     public User updateUser(Integer id, User userDetails) {
         User user = userRepository.findById(id)
