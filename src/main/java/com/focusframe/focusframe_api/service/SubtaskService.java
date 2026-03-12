@@ -3,8 +3,10 @@ package com.focusframe.focusframe_api.service;
 import com.focusframe.focusframe_api.model.Subtask;
 import com.focusframe.focusframe_api.repository.SubtaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,10 +35,15 @@ public class SubtaskService {
     public List<Subtask> getSubtasksByCompleted(Boolean completed) {
         return subtaskRepository.findByCompleted(completed);
     }
-    
+
+    public List<Subtask> getTodayTasksWhichNotCompleted(LocalDateTime startOfDay, LocalDateTime endOfDay, Sort sort) {
+        return subtaskRepository.findByStartTimeBetweenAndCompletedFalse(startOfDay, endOfDay, sort);
+    }
+
     public List<Subtask> getSubtasksByTaskIdAndCompleted(Integer taskId, Boolean completed) {
         return subtaskRepository.findByTaskIdAndCompleted(taskId, completed);
     }
+
     
     public Subtask createSubtask(Subtask subtask) {
         return subtaskRepository.save(subtask);
