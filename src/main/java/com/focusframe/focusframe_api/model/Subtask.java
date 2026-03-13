@@ -26,7 +26,7 @@ public class Subtask {
     @Column(columnDefinition = "TEXT")
     private String description;
     
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "task_id", nullable = false)
     private Task task;
     
