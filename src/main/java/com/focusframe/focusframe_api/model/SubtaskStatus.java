@@ -1,8 +1,16 @@
 package com.focusframe.focusframe_api.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "subtask_statuses")
 public class SubtaskStatus {
     
@@ -13,8 +21,7 @@ public class SubtaskStatus {
     @Column(nullable = false, unique = true, length = 50)
     private String name;
     
-    public SubtaskStatus() {
-    }
+
     
     public SubtaskStatus(String name) {
         this.name = name;
