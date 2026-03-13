@@ -1,6 +1,6 @@
 package com.focusframe.focusframe_api.service;
 
-import com.focusframe.focusframe_api.dto.subTasks.SubTaskDto;
+import com.focusframe.focusframe_api.dto.subTasksDto.SubTaskDto;
 import com.focusframe.focusframe_api.model.Subtask;
 import com.focusframe.focusframe_api.repository.SubtaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;

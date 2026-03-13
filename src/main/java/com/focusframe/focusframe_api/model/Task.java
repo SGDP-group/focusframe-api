@@ -1,9 +1,12 @@
 package com.focusframe.focusframe_api.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.lang.reflect.Array;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 
 @Getter
@@ -32,8 +35,8 @@ public class Task {
     
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-    
-    
+
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

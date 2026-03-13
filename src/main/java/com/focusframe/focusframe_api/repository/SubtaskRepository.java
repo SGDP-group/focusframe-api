@@ -1,6 +1,6 @@
 package com.focusframe.focusframe_api.repository;
 
-import com.focusframe.focusframe_api.dto.subTasks.SubTaskDto;
+import com.focusframe.focusframe_api.dto.subTasksDto.SubTaskDto;
 import com.focusframe.focusframe_api.model.Subtask;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
