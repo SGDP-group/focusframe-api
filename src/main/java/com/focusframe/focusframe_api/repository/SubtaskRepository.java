@@ -1,5 +1,6 @@
 package com.focusframe.focusframe_api.repository;
 
+import com.focusframe.focusframe_api.dto.subTasks.SubTaskDto;
 import com.focusframe.focusframe_api.model.Subtask;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Sort;
@@ -18,5 +19,5 @@ public interface SubtaskRepository extends JpaRepository<Subtask, Integer> {
     List<Subtask> findByCompleted(Boolean completed);
     List<Subtask> findByTaskIdAndCompleted(Integer taskId, Boolean completed);
 
-    List<Subtask> findByStartTimeBetweenAndCompletedFalse(LocalDateTime startTimeDateDay,LocalDateTime endTimeDateDay, Sort sort);
+    List<SubTaskDto> findByStartTimeBetweenAndCompletedFalse(LocalDateTime startTimeDateDay, LocalDateTime endTimeDateDay, Sort sort);
 }

@@ -1,5 +1,6 @@
 package com.focusframe.focusframe_api.controller;
 
+import com.focusframe.focusframe_api.dto.subTasks.SubTaskDto;
 import com.focusframe.focusframe_api.model.Subtask;
 import com.focusframe.focusframe_api.service.SubtaskService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +58,7 @@ public class SubtaskController {
 
 
     @GetMapping("/today")
-    public ResponseEntity<List<Subtask>> getTodaysSubtasks(
+    public ResponseEntity<List<SubTaskDto>> getTodaysSubtasks(
             @RequestParam(defaultValue = "startTime") String sortBy,
             @RequestParam(defaultValue = "asc") String direction) {
 
@@ -70,7 +71,7 @@ public class SubtaskController {
                 ? Sort.by(sortBy).descending()
                 : Sort.by(sortBy).ascending();
 
-        List<Subtask> subtasks = subtaskService.getTodayTasksWhichNotCompleted(startOfDay, endOfDay, sort);
+        List<SubTaskDto> subtasks = subtaskService.getTodayTasksWhichNotCompleted(startOfDay, endOfDay, sort);
 
         return ResponseEntity.ok(subtasks);
     }
