@@ -36,6 +36,15 @@ public class Task {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @OneToMany(
+            fetch = FetchType.LAZY,
+            mappedBy = "task",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @JsonManagedReference
+    private ArrayList<Subtask> subTasks = new ArrayList<>();
+
 
     @PrePersist
     protected void onCreate() {
