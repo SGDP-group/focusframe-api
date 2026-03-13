@@ -2,12 +2,10 @@ package com.focusframe.focusframe_api.repository;
 
 import com.focusframe.focusframe_api.dto.subTasks.SubTaskDto;
 import com.focusframe.focusframe_api.model.Subtask;
-import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
