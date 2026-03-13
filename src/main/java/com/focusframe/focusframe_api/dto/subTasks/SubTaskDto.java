@@ -1,5 +1,7 @@
 package com.focusframe.focusframe_api.dto.subTasks;
 
+import com.focusframe.focusframe_api.model.Subtask;
+
 import java.time.LocalDateTime;
 
 public record SubTaskDto(
@@ -14,16 +16,15 @@ public record SubTaskDto(
 
 
 ) {
-    public SubTaskDto fromDto(SubTaskDto subTaskDto) {
+    public static SubTaskDto from (Subtask subTask) {
         return new SubTaskDto(
-                subTaskDto.mainTaskName,
-                subTaskDto.name(),
-                subTaskDto.description(),
-                subTaskDto.taskOrder(),
-                subTaskDto.startTime(),
-                subTaskDto.endTime(),
-                subTaskDto.duration(),
-                subTaskDto.estimatedTime()
+                subTask.getTask().getName(),
+                subTask.getName(),
+                subTask.getDescription(),
+                subTask.getTaskOrder(),
+                subTask.getStartTime(),
+                subTask.getEndTime(),
+                subTask.getDuration(),
+                subTask.getEstimatedTime()
         );
     }}
-
