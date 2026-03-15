@@ -11,11 +11,12 @@ import java.util.List;
 
 @Repository
 public interface SubtaskRepository extends JpaRepository<Subtask, Integer> {
-    List<Subtask> findByTaskId(Integer taskId);
-    List<Subtask> findByTaskIdOrderByTaskOrderAsc(Integer taskId);
-    List<Subtask> findByStatusId(Integer statusId);
+    List<Subtask> findByTask_Id(Integer taskId);
+    List<SubTaskDto> findByTask_IdOrderByTaskOrderAsc(Integer taskId);
+    List<Subtask> findByStatus_Id(Integer statusId);
     List<Subtask> findByCompleted(Boolean completed);
-    List<Subtask> findByTaskIdAndCompleted(Integer taskId, Boolean completed);
+    List<Subtask> findByTask_IdAndCompleted(Integer taskId, Boolean completed);
 
-    List<SubTaskDto> findByStartTimeBetweenAndCompletedFalse(LocalDateTime startTimeDateDay, LocalDateTime endTimeDateDay, Sort sort);
+    List<Subtask> findByStartTimeBetweenAndCompletedFalse(LocalDateTime startTimeDateDay, LocalDateTime endTimeDateDay, Sort sort);
+    List<Subtask> findByTask_IdAndStartTimeBetweenAndCompletedFalse(Integer taskId, LocalDateTime startTimeDateDay, LocalDateTime endTimeDateDay, Sort sort);
 }
