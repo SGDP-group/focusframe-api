@@ -7,7 +7,7 @@ import lombok.*;
 import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-
+import java.util.List;
 
 @Getter
 @Entity
@@ -43,8 +43,8 @@ public class Task {
             orphanRemoval = true
     )
     @JsonManagedReference
-    private ArrayList<Subtask> subTasks = new ArrayList<>();
-
+    @Builder.Default
+    private List<Subtask> subTasks = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
