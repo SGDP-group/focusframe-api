@@ -2,12 +2,14 @@ package com.focusframe.focusframe_api.controller;
 
 import com.focusframe.focusframe_api.model.Task;
 import com.focusframe.focusframe_api.service.TaskService;
+import com.focusframe.focusframe_api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tasks")
@@ -16,6 +18,7 @@ public class TaskController {
     
     @Autowired
     private TaskService taskService;
+    private UserService userService;
     
     @GetMapping
     public ResponseEntity<List<Task>> getAllTasks() {
@@ -41,9 +44,11 @@ public class TaskController {
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<Task> updateTask(@PathVariable Integer id, @RequestBody Task task) {
+    public ResponseEntity<Task> updateTask(@PathVariable Integer id, @RequestBody Map<String, Object> updateData) {
         try {
-            Task updatedTask = taskService.updateTask(id, task);
+            String name = (String) updateData.get("name");
+            Integer userId = (Integer) updateData.get("userId");
+            Task updatedTask = taskService.updateTask(id, name, userId);
             return ResponseEntity.ok(updatedTask);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
