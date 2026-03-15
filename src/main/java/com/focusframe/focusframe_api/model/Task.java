@@ -46,6 +46,22 @@ public class Task {
     @Builder.Default
     private List<Subtask> subTasks = new ArrayList<>();
 
+
+    @Column(name="description",columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name="deadline")
+    private LocalDateTime deadline;
+
+    @Column(name = "duration")
+    private Integer duration;
+
+    @Column(name = "focus_time")
+    private Integer focusTime;
+
+    @Column(name = "break_time")
+    private Integer breakTime;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
