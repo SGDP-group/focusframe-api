@@ -3,19 +3,29 @@ package com.focusframe.focusframe_api.service;
 import com.focusframe.focusframe_api.dto.subTasksDto.SubTaskDto;
 import com.focusframe.focusframe_api.model.Subtask;
 import com.focusframe.focusframe_api.repository.SubtaskRepository;
+import com.focusframe.focusframe_api.repository.TaskRepository;
+import com.focusframe.focusframe_api.repository.SubtaskStatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class SubtaskService {
     
     @Autowired
     private SubtaskRepository subtaskRepository;
+    
+    @Autowired
+    private TaskRepository taskRepository;
+    
+    @Autowired
+    private SubtaskStatusRepository subtaskStatusRepository;
     
     public List<Subtask> getAllSubtasks() {
         return subtaskRepository.findAll();
@@ -25,24 +35,34 @@ public class SubtaskService {
         return subtaskRepository.findById(id);
     }
     
-    public List<Subtask> getSubtasksByTaskId(Integer taskId) {
-        return subtaskRepository.findByTaskIdOrderByTaskOrderAsc(taskId);
+    public List<SubTaskDto> getSubtasksByTaskId(Integer taskId) {
+        return subtaskRepository.findByTask_IdOrderByTaskOrderAsc(taskId);
     }
     
     public List<Subtask> getSubtasksByStatusId(Integer statusId) {
-        return subtaskRepository.findByStatusId(statusId);
+        return subtaskRepository.findByStatus_Id(statusId);
     }
     
     public List<Subtask> getSubtasksByCompleted(Boolean completed) {
         return subtaskRepository.findByCompleted(completed);
     }
 
-    public List<SubTaskDto> getTodayTasksWhichNotCompleted(LocalDateTime startOfDay, LocalDateTime endOfDay, Sort sort) {
-        return subtaskRepository.findByStartTimeBetweenAndCompletedFalse(startOfDay, endOfDay, sort);
-    }
+//    public List<SubTaskDto> getTodaySubTasksWhichNotCompleted(LocalDateTime startOfDay, LocalDateTime endOfDay, Sort sort) {
+//        return subtaskRepository.findByStartTimeBetweenAndCompletedFalse(startOfDay, endOfDay, sort)
+//                .stream()
+//                .map(SubTaskDto::from)
+//                .collect(Collectors.toList());
+//    }
+//
+//    public List<SubTaskDto> getTodaySubTasksWhichNotCompletedByTaskId(Integer taskId, LocalDateTime startOfDay, LocalDateTime endOfDay, Sort sort) {
+//        return subtaskRepository.findByTask_IdAndStartTimeBetweenAndCompletedFalse(taskId, startOfDay, endOfDay, sort)
+//                .stream()
+//                .map(SubTaskDto::from)
+//                .collect(Collectors.toList());
+//    }
 
     public List<Subtask> getSubtasksByTaskIdAndCompleted(Integer taskId, Boolean completed) {
-        return subtaskRepository.findByTaskIdAndCompleted(taskId, completed);
+        return subtaskRepository.findByTask_IdAndCompleted(taskId, completed);
     }
 
     
@@ -56,7 +76,10 @@ public class SubtaskService {
         
         subtask.setName(subtaskDetails.getName());
         subtask.setDescription(subtaskDetails.getDescription());
-        subtask.setTask(subtaskDetails.getTask());
+        if (subtaskDetails.getTask() != null && subtaskDetails.getTask().getId() != null) {
+            subtask.setTask(taskRepository.findById(subtaskDetails.getTask().getId())
+                .orElseThrow(() -> new RuntimeException("Task not found with id: " + subtaskDetails.getTask().getId())));
+        }
         subtask.setTaskOrder(subtaskDetails.getTaskOrder());
         subtask.setStartTime(subtaskDetails.getStartTime());
         subtask.setDuration(subtaskDetails.getDuration());
@@ -65,50 +88,62 @@ public class SubtaskService {
         subtask.setProductive(subtaskDetails.getProductive());
         subtask.setIsTracked(subtaskDetails.getIsTracked());
         subtask.setIsAiBreakdown(subtaskDetails.getIsAiBreakdown());
-        subtask.setStatus(subtaskDetails.getStatus());
+        if (subtaskDetails.getStatus() != null && subtaskDetails.getStatus().getId() != null) {
+            subtask.setStatus(subtaskStatusRepository.findById(subtaskDetails.getStatus().getId())
+                .orElseThrow(() -> new RuntimeException("SubtaskStatus not found with id: " + subtaskDetails.getStatus().getId())));
+        }
         
         return subtaskRepository.save(subtask);
     }
     
-    public Subtask partialUpdateSubtask(Integer id, Subtask subtaskDetails) {
+    public Subtask partialUpdateSubtask(Integer id, Map<String, Object> updates) {
         Subtask subtask = subtaskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Subtask not found with id: " + id));
         
-        if (subtaskDetails.getName() != null) {
-            subtask.setName(subtaskDetails.getName());
+        if (updates.containsKey("name")) {
+            subtask.setName((String) updates.get("name"));
         }
-        if (subtaskDetails.getDescription() != null) {
-            subtask.setDescription(subtaskDetails.getDescription());
+        if (updates.containsKey("description")) {
+            subtask.setDescription((String) updates.get("description"));
         }
-        if (subtaskDetails.getTask() != null) {
-            subtask.setTask(subtaskDetails.getTask());
+        if (updates.containsKey("taskId")) {
+            Integer taskId = (Integer) updates.get("taskId");
+            if (taskId != null) {
+                subtask.setTask(taskRepository.findById(taskId)
+                    .orElseThrow(() -> new RuntimeException("Task not found with id: " + taskId)));
+            }
         }
-        if (subtaskDetails.getTaskOrder() != null) {
-            subtask.setTaskOrder(subtaskDetails.getTaskOrder());
+        if (updates.containsKey("taskOrder")) {
+            subtask.setTaskOrder((Integer) updates.get("taskOrder"));
         }
-        if (subtaskDetails.getStartTime() != null) {
-            subtask.setStartTime(subtaskDetails.getStartTime());
+        if (updates.containsKey("startTime")) {
+            // Assuming startTime is sent as LocalDateTime or string, but for simplicity, cast
+            subtask.setStartTime((LocalDateTime) updates.get("startTime"));
         }
-        if (subtaskDetails.getDuration() != null) {
-            subtask.setDuration(subtaskDetails.getDuration());
+        if (updates.containsKey("duration")) {
+            subtask.setDuration((Integer) updates.get("duration"));
         }
-        if (subtaskDetails.getEstimatedTime() != null) {
-            subtask.setEstimatedTime(subtaskDetails.getEstimatedTime());
+        if (updates.containsKey("estimatedTime")) {
+            subtask.setEstimatedTime((Integer) updates.get("estimatedTime"));
         }
-        if (subtaskDetails.getCompleted() != null) {
-            subtask.setCompleted(subtaskDetails.getCompleted());
+        if (updates.containsKey("completed")) {
+            subtask.setCompleted((Boolean) updates.get("completed"));
         }
-        if (subtaskDetails.getProductive() != null) {
-            subtask.setProductive(subtaskDetails.getProductive());
+        if (updates.containsKey("productive")) {
+            subtask.setProductive((Integer) updates.get("productive"));
         }
-        if (subtaskDetails.getIsTracked() != null) {
-            subtask.setIsTracked(subtaskDetails.getIsTracked());
+        if (updates.containsKey("isTracked")) {
+            subtask.setIsTracked((Boolean) updates.get("isTracked"));
         }
-        if (subtaskDetails.getIsAiBreakdown() != null) {
-            subtask.setIsAiBreakdown(subtaskDetails.getIsAiBreakdown());
+        if (updates.containsKey("isAiBreakdown")) {
+            subtask.setIsAiBreakdown((Boolean) updates.get("isAiBreakdown"));
         }
-        if (subtaskDetails.getStatus() != null) {
-            subtask.setStatus(subtaskDetails.getStatus());
+        if (updates.containsKey("statusId")) {
+            Integer statusId = (Integer) updates.get("statusId");
+            if (statusId != null) {
+                subtask.setStatus(subtaskStatusRepository.findById(statusId)
+                    .orElseThrow(() -> new RuntimeException("SubtaskStatus not found with id: " + statusId)));
+            }
         }
         
         return subtaskRepository.save(subtask);

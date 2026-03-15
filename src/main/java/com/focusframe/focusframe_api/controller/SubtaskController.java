@@ -2,7 +2,10 @@ package com.focusframe.focusframe_api.controller;
 
 import com.focusframe.focusframe_api.dto.subTasksDto.SubTaskDto;
 import com.focusframe.focusframe_api.model.Subtask;
+import com.focusframe.focusframe_api.model.Task;
 import com.focusframe.focusframe_api.service.SubtaskService;
+import com.focusframe.focusframe_api.service.TaskService;
+import com.focusframe.focusframe_api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -13,6 +16,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/subtasks")
@@ -21,6 +27,17 @@ public class SubtaskController {
     
     @Autowired
     private SubtaskService subtaskService;
+    @Autowired
+    private TaskService taskService;
+    @Autowired
+    private UserService userService;
+
+    
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
+            "id", "taskName", "taskId", "name", "description", "taskOrder", "startTime", "endTime", "duration", "estimatedTime"
+    );
+    
+    private static final Set<String> ALLOWED_DIRECTIONS = Set.of("asc", "desc");
     
     @GetMapping
     public ResponseEntity<List<Subtask>> getAllSubtasks() {
@@ -35,7 +52,7 @@ public class SubtaskController {
     }
     
     @GetMapping("/task/{taskId}")
-    public ResponseEntity<List<Subtask>> getSubtasksByTaskId(@PathVariable Integer taskId) {
+    public ResponseEntity<List<SubTaskDto>> getSubtasksByTaskId(@PathVariable Integer taskId) {
         return ResponseEntity.ok(subtaskService.getSubtasksByTaskId(taskId));
     }
     
@@ -55,26 +72,44 @@ public class SubtaskController {
             @PathVariable Boolean completed) {
         return ResponseEntity.ok(subtaskService.getSubtasksByTaskIdAndCompleted(taskId, completed));
     }
+//
+//
+//    @GetMapping("/today")
+//    public ResponseEntity<List<SubTaskDto>> getTodaySubtasks(
+//            @RequestParam Integer MainTaskId,
+//            @RequestParam(defaultValue = "startTime") String sortBy,
+//            @RequestParam(defaultValue = "asc") String direction) {
+//
+//
+//        Task taskId  = taskService.getTaskById(MainTaskId);
+//
+//        // Validate sortBy
+//        if (!ALLOWED_SORT_FIELDS.contains(sortBy)) {
+//            return ResponseEntity.badRequest().build();
+//        }
+//
+//        // Validate direction
+//        if (!ALLOWED_DIRECTIONS.contains(direction.toLowerCase())) {
+//            return ResponseEntity.badRequest().build();
+//        }
+//
+//        // Define the start and end of the current day
+//        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+//        LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
+//
+//        // Handle Sorting
+//        Sort sort = direction.equalsIgnoreCase("desc")
+//                ? Sort.by(sortBy).descending()
+//                : Sort.by(sortBy).ascending();
+//
+//        List<SubTaskDto> subtasks = subtaskService.getTodaySubTasksWhichNotCompletedByTaskId(taskId,startOfDay, endOfDay, sort);
+//
+//        return ResponseEntity.ok(subtasks);
+//    }
 
 
-    @GetMapping("/today")
-    public ResponseEntity<List<SubTaskDto>> getTodaysSubtasks(
-            @RequestParam(defaultValue = "startTime") String sortBy,
-            @RequestParam(defaultValue = "asc") String direction) {
 
-        // Define the start and end of the current day
-        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-        LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
 
-        // Handle Sorting
-        Sort sort = direction.equalsIgnoreCase("desc")
-                ? Sort.by(sortBy).descending()
-                : Sort.by(sortBy).ascending();
-
-        List<SubTaskDto> subtasks = subtaskService.getTodayTasksWhichNotCompleted(startOfDay, endOfDay, sort);
-
-        return ResponseEntity.ok(subtasks);
-    }
 
 
 
@@ -101,9 +136,9 @@ public class SubtaskController {
     }
     
     @PatchMapping("/{id}")
-    public ResponseEntity<Subtask> partialUpdateSubtask(@PathVariable Integer id, @RequestBody Subtask subtask) {
+    public ResponseEntity<Subtask> partialUpdateSubtask(@PathVariable Integer id, @RequestBody Map<String, Object> updates) {
         try {
-            Subtask updatedSubtask = subtaskService.partialUpdateSubtask(id, subtask);
+            Subtask updatedSubtask = subtaskService.partialUpdateSubtask(id, updates);
             return ResponseEntity.ok(updatedSubtask);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
