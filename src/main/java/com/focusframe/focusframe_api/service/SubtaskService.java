@@ -1,10 +1,13 @@
 package com.focusframe.focusframe_api.service;
 
+import com.focusframe.focusframe_api.dto.subTasksDto.SubTaskDto;
 import com.focusframe.focusframe_api.model.Subtask;
 import com.focusframe.focusframe_api.repository.SubtaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,10 +36,15 @@ public class SubtaskService {
     public List<Subtask> getSubtasksByCompleted(Boolean completed) {
         return subtaskRepository.findByCompleted(completed);
     }
-    
+
+    public List<SubTaskDto> getTodayTasksWhichNotCompleted(LocalDateTime startOfDay, LocalDateTime endOfDay, Sort sort) {
+        return subtaskRepository.findByStartTimeBetweenAndCompletedFalse(startOfDay, endOfDay, sort);
+    }
+
     public List<Subtask> getSubtasksByTaskIdAndCompleted(Integer taskId, Boolean completed) {
         return subtaskRepository.findByTaskIdAndCompleted(taskId, completed);
     }
+
     
     public Subtask createSubtask(Subtask subtask) {
         return subtaskRepository.save(subtask);
@@ -48,7 +56,7 @@ public class SubtaskService {
         
         subtask.setName(subtaskDetails.getName());
         subtask.setDescription(subtaskDetails.getDescription());
-        subtask.setTaskId(subtaskDetails.getTaskId());
+        subtask.setTask(subtaskDetails.getTask());
         subtask.setTaskOrder(subtaskDetails.getTaskOrder());
         subtask.setStartTime(subtaskDetails.getStartTime());
         subtask.setDuration(subtaskDetails.getDuration());
@@ -57,7 +65,7 @@ public class SubtaskService {
         subtask.setProductive(subtaskDetails.getProductive());
         subtask.setIsTracked(subtaskDetails.getIsTracked());
         subtask.setIsAiBreakdown(subtaskDetails.getIsAiBreakdown());
-        subtask.setStatusId(subtaskDetails.getStatusId());
+        subtask.setStatus(subtaskDetails.getStatus());
         
         return subtaskRepository.save(subtask);
     }
@@ -72,8 +80,8 @@ public class SubtaskService {
         if (subtaskDetails.getDescription() != null) {
             subtask.setDescription(subtaskDetails.getDescription());
         }
-        if (subtaskDetails.getTaskId() != null) {
-            subtask.setTaskId(subtaskDetails.getTaskId());
+        if (subtaskDetails.getTask() != null) {
+            subtask.setTask(subtaskDetails.getTask());
         }
         if (subtaskDetails.getTaskOrder() != null) {
             subtask.setTaskOrder(subtaskDetails.getTaskOrder());
@@ -99,8 +107,8 @@ public class SubtaskService {
         if (subtaskDetails.getIsAiBreakdown() != null) {
             subtask.setIsAiBreakdown(subtaskDetails.getIsAiBreakdown());
         }
-        if (subtaskDetails.getStatusId() != null) {
-            subtask.setStatusId(subtaskDetails.getStatusId());
+        if (subtaskDetails.getStatus() != null) {
+            subtask.setStatus(subtaskDetails.getStatus());
         }
         
         return subtaskRepository.save(subtask);

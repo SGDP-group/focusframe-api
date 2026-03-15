@@ -35,7 +35,7 @@ public class TaskService {
                 .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
         
         task.setName(taskDetails.getName());
-        task.setUserId(taskDetails.getUserId());
+        task.setUser(taskDetails.getUser());
         return taskRepository.save(task);
     }
     
