@@ -1,5 +1,7 @@
 package com.focusframe.focusframe_api.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,6 +30,7 @@ public class Subtask {
     
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "task_id", nullable = false)
+    @JsonBackReference
     private Task task;
     
     @Column(name = "task_order", nullable = false)
@@ -47,15 +50,18 @@ public class Subtask {
     private Integer estimatedTime;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean completed = false;
 
     @Column
     private Integer productive;
 
     @Column(name = "is_tracked", nullable = false)
+    @Builder.Default
     private Boolean isTracked = true;
 
     @Column(name = "is_ai_breakdown", nullable = false)
+    @Builder.Default
     private Boolean isAiBreakdown = false;
 
     @ManyToOne

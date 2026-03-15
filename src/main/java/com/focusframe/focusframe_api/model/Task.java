@@ -42,6 +42,9 @@ public class Task {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+
+
+
     @JsonManagedReference
     @Builder.Default
     private List<Subtask> subTasks = new ArrayList<>();
