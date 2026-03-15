@@ -1,12 +1,17 @@
 package com.focusframe.focusframe_api.controller;
 
+import com.focusframe.focusframe_api.dto.subTasksDto.SubTaskDto;
 import com.focusframe.focusframe_api.model.Subtask;
 import com.focusframe.focusframe_api.service.SubtaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -50,7 +55,29 @@ public class SubtaskController {
             @PathVariable Boolean completed) {
         return ResponseEntity.ok(subtaskService.getSubtasksByTaskIdAndCompleted(taskId, completed));
     }
-    
+
+
+    @GetMapping("/today")
+    public ResponseEntity<List<SubTaskDto>> getTodaysSubtasks(
+            @RequestParam(defaultValue = "startTime") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+
+        // Define the start and end of the current day
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
+
+        // Handle Sorting
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        List<SubTaskDto> subtasks = subtaskService.getTodayTasksWhichNotCompleted(startOfDay, endOfDay, sort);
+
+        return ResponseEntity.ok(subtasks);
+    }
+
+
+
     @PostMapping
     public ResponseEntity<Subtask> createSubtask(@RequestBody Subtask subtask) {
         try {
