@@ -64,4 +64,9 @@ public class TaskController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/user/{userId}/incomplete-today-or-before")
+    public ResponseEntity<List<Task>> getTasksWithIncompleteSubtasksBeforeOrOnToday(@PathVariable Integer userId) {
+        return ResponseEntity.ok(taskService.getTasksWithIncompleteSubtasksBeforeOrOnToday(userId));
+    }
 }
