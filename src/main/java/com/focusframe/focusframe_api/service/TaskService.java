@@ -6,6 +6,9 @@ import com.focusframe.focusframe_api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +17,7 @@ public class TaskService {
     
     @Autowired
     private TaskRepository taskRepository;
+    @Autowired
     private  UserRepository  userRepository;
 
     public TaskService(UserRepository userRepository, TaskRepository taskRepository) {
@@ -50,5 +54,10 @@ public class TaskService {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
         taskRepository.delete(task);
+    }
+
+    public List<Task> getTasksWithIncompleteSubtasksBeforeOrOnToday(Integer userId) {
+        LocalDateTime today = LocalDate.now().atTime(LocalTime.MAX);
+        return taskRepository.findTasksWithIncompleteSubtasksBeforeOrOn(userId, today);
     }
 }

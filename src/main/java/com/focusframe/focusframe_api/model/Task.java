@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +40,7 @@ public class Task {
             mappedBy = "task",
             cascade = CascadeType.ALL,
             orphanRemoval = true
-    )
-    @JsonManagedReference
+    ) @JsonManagedReference
     @Builder.Default
     private List<Subtask> subTasks = new ArrayList<>();
 

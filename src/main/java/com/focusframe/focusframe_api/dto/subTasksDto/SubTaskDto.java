@@ -5,7 +5,7 @@ import com.focusframe.focusframe_api.model.Subtask;
 import java.time.LocalDateTime;
 
 public record SubTaskDto(
-        Integer id,        // Add this field
+        Integer id,
         String taskName,
         Integer taskId,
         String name,
@@ -18,9 +18,9 @@ public record SubTaskDto(
 
 
 ) {
-    public static SubTaskDto from (Subtask subTask) {
+    public static SubTaskDto from (Subtask  subTask) {
         return new SubTaskDto(
-                subTask.getId(),    // Map the ID here
+                subTask.getId(),
                 subTask.getTask().getName(),
                 subTask.getTask().getId(),
                 subTask.getName(),
