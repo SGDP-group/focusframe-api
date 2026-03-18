@@ -11,7 +11,7 @@ public record FullTaskDto(
         List<SubTaskDto>subTasks
 
 ) {
-    public FullTaskDto from (Task task) {
+    public static FullTaskDto from (Task task) {
         return new FullTaskDto(
                 task.getId(),
                 task.getName(),

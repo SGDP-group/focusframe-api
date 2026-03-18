@@ -10,7 +10,7 @@ public record TaskDto(
         String name
 
 ) {
-    public TaskDto from (Task task) {
+    public static TaskDto from (Task task) {
         return new TaskDto(
                 task.getId(),
                 task.getName());
