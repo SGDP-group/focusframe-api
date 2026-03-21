@@ -10,11 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 
 @Service
 public class SubtaskService {
@@ -61,6 +61,15 @@ public class SubtaskService {
 //                .map(SubTaskDto::from)
 //                .collect(Collectors.toList());
 //    }
+
+    public List<SubTaskDto> getDueTodayUpcomingOrOngoing(Integer userId) {
+        Sort sort = Sort.by("startTime").descending();
+
+        return subtaskRepository.findDueTodayUpcomingOrOngoing(userId, sort)
+                .stream()
+                .map(SubTaskDto::from)
+                .collect(Collectors.toList());
+    }
 
     public List<Subtask> getSubtasksByTaskIdAndCompleted(Integer taskId, Boolean completed) {
         return subtaskRepository.findByTask_IdAndCompleted(taskId, completed);

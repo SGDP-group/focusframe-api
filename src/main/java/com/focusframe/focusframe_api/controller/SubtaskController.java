@@ -32,11 +32,10 @@ public class SubtaskController {
     @Autowired
     private UserService userService;
 
-    
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
             "id", "taskName", "taskId", "name", "description", "taskOrder", "startTime", "endTime", "duration", "estimatedTime"
     );
-    
+
     private static final Set<String> ALLOWED_DIRECTIONS = Set.of("asc", "desc");
     
     @GetMapping
@@ -71,6 +70,12 @@ public class SubtaskController {
             @PathVariable Integer taskId, 
             @PathVariable Boolean completed) {
         return ResponseEntity.ok(subtaskService.getSubtasksByTaskIdAndCompleted(taskId, completed));
+    }
+
+    @GetMapping("/due-today")
+    public ResponseEntity<List<SubTaskDto>> getDueTodayUpcomingOrOngoingSubtasks(
+            @RequestParam Integer userId) {
+        return ResponseEntity.ok(subtaskService.getDueTodayUpcomingOrOngoing(userId));
     }
 //
 //
