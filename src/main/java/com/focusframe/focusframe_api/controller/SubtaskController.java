@@ -2,14 +2,23 @@ package com.focusframe.focusframe_api.controller;
 
 import com.focusframe.focusframe_api.dto.subTasksDto.SubTaskDto;
 import com.focusframe.focusframe_api.model.Subtask;
+import com.focusframe.focusframe_api.model.Task;
 import com.focusframe.focusframe_api.service.SubtaskService;
+import com.focusframe.focusframe_api.service.TaskService;
+import com.focusframe.focusframe_api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/subtasks")
@@ -18,6 +27,16 @@ public class SubtaskController {
     
     @Autowired
     private SubtaskService subtaskService;
+    @Autowired
+    private TaskService taskService;
+    @Autowired
+    private UserService userService;
+
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
+            "id", "taskName", "taskId", "name", "description", "taskOrder", "startTime", "endTime", "duration", "estimatedTime"
+    );
+
+    private static final Set<String> ALLOWED_DIRECTIONS = Set.of("asc", "desc");
     
     @GetMapping
     public ResponseEntity<List<Subtask>> getAllSubtasks() {
