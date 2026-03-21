@@ -48,11 +48,6 @@ public class Task {
     @Column(name="description",columnDefinition = "TEXT")
     private String description;
 
-    @Column(name="deadline")
-    private LocalDateTime deadline;
-
-    @Column(name = "duration")
-    private Integer duration;
 
     @Column(name = "focus_time")
     private Integer focusTime;
