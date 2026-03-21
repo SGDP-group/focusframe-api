@@ -24,19 +24,9 @@ public interface SubtaskRepository extends JpaRepository<Subtask, Integer> {
 
         @Query("""
             SELECT s FROM Subtask s
-            WHERE s.completed = false
-              AND s.task.user.id = :userId
-              AND s.startTime >= :startOfDay
-              AND s.startTime <= :endOfDay
-              AND (
-                s.startTime >= :now
-                OR (s.startTime <= :now AND s.endTime >= :now)
-              )
+            WHERE s.task.user.id = :userId
             """)
         List<Subtask> findDueTodayUpcomingOrOngoing(
             @Param("userId") Integer userId,
-            @Param("startOfDay") LocalDateTime startOfDay,
-            @Param("endOfDay") LocalDateTime endOfDay,
-            @Param("now") LocalDateTime now,
             Sort sort);
 }
