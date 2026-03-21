@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 @Repository
@@ -23,25 +22,21 @@ public interface SubtaskRepository extends JpaRepository<Subtask, Integer> {
     List<Subtask> findByStartTimeBetweenAndCompletedFalse(LocalDateTime startTimeDateDay, LocalDateTime endTimeDateDay, Sort sort);
     List<Subtask> findByTask_IdAndStartTimeBetweenAndCompletedFalse(Integer taskId, LocalDateTime startTimeDateDay, LocalDateTime endTimeDateDay, Sort sort);
 
-            @Query("""
-              SELECT s FROM Subtask s
-              WHERE s.completed = false
-                AND s.task.user.id = :userId
-                AND s.startTime >= :startOfDay
-                AND s.startTime <= :endOfDay
-                AND (
-                FUNCTION('TIME', s.startTime) >= :nowTime
-                OR (
-              FUNCTION('TIME', s.startTime) <= :nowTime
-              AND s.endTime IS NOT NULL
-              AND FUNCTION('TIME', s.endTime) >= :nowTime
-                )
-                )
-              """)
-            List<Subtask> findDueTodayUpcomingOrOngoingByUserId(
-              @Param("userId") Integer userId,
+        @Query("""
+            SELECT s FROM Subtask s
+            WHERE s.completed = false
+              AND s.task.user.id = :userId
+              AND s.startTime >= :startOfDay
+              AND s.startTime <= :endOfDay
+              AND (
+                s.startTime >= :now
+                OR (s.startTime <= :now AND s.endTime >= :now)
+              )
+            """)
+        List<Subtask> findDueTodayUpcomingOrOngoing(
+            @Param("userId") Integer userId,
             @Param("startOfDay") LocalDateTime startOfDay,
             @Param("endOfDay") LocalDateTime endOfDay,
-              @Param("nowTime") LocalTime nowTime,
+            @Param("now") LocalDateTime now,
             Sort sort);
 }
