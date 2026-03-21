@@ -68,18 +68,20 @@ public class SubtaskService {
 
     
     public Subtask createSubtask(Subtask subtask) {
-        if (subtask.getTask() != null && subtask.getTask().getId() != null) {
-            subtask.setTask(taskRepository.findById(subtask.getTask().getId())
-                .orElseThrow(() -> new RuntimeException("Task not found")));
+        if (subtask.getTask() == null || subtask.getTask().getId() == null) {
+            throw new IllegalArgumentException("Task is required and must have a valid ID");
         }
+        
+        subtask.setTask(taskRepository.findById(subtask.getTask().getId())
+            .orElseThrow(() -> new IllegalArgumentException("Task not found with id: " + subtask.getTask().getId())));
 
-        if (subtask.getStatus() == null) {
+        if (subtask.getStatus() == null || subtask.getStatus().getId() == null) {
             SubtaskStatus defaultStatus = subtaskStatusRepository.findById(1)
-                .orElseThrow(() -> new RuntimeException("Default status not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Default status not found"));
             subtask.setStatus(defaultStatus);
-        } else if (subtask.getStatus().getId() != null) {
+        } else {
             subtask.setStatus(subtaskStatusRepository.findById(subtask.getStatus().getId())
-                .orElseThrow(() -> new RuntimeException("Status not found")));
+                .orElseThrow(() -> new IllegalArgumentException("Status not found with id: " + subtask.getStatus().getId())));
         }
         
         return subtaskRepository.save(subtask);
@@ -87,13 +89,13 @@ public class SubtaskService {
     
     public Subtask updateSubtask(Integer id, Subtask subtaskDetails) {
         Subtask subtask = subtaskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Subtask not found with id: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Subtask not found with id: " + id));
         
         subtask.setName(subtaskDetails.getName());
         subtask.setDescription(subtaskDetails.getDescription());
         if (subtaskDetails.getTask() != null && subtaskDetails.getTask().getId() != null) {
             subtask.setTask(taskRepository.findById(subtaskDetails.getTask().getId())
-                .orElseThrow(() -> new RuntimeException("Task not found with id: " + subtaskDetails.getTask().getId())));
+                .orElseThrow(() -> new IllegalArgumentException("Task not found with id: " + subtaskDetails.getTask().getId())));
         }
         subtask.setTaskOrder(subtaskDetails.getTaskOrder());
         subtask.setStartTime(subtaskDetails.getStartTime());
@@ -105,7 +107,9 @@ public class SubtaskService {
         subtask.setIsAiBreakdown(subtaskDetails.getIsAiBreakdown());
         if (subtaskDetails.getStatus() != null && subtaskDetails.getStatus().getId() != null) {
             subtask.setStatus(subtaskStatusRepository.findById(subtaskDetails.getStatus().getId())
-                .orElseThrow(() -> new RuntimeException("SubtaskStatus not found with id: " + subtaskDetails.getStatus().getId())));
+                .orElseThrow(() -> new IllegalArgumentException("SubtaskStatus not found with id: " + subtaskDetails.getStatus().getId())));
+        } else if (subtaskDetails.getStatus() != null && subtaskDetails.getStatus().getId() == null) {
+            throw new IllegalArgumentException("Status ID is required if status is provided");
         }
         
         return subtaskRepository.save(subtask);
@@ -125,7 +129,7 @@ public class SubtaskService {
             Integer taskId = (Integer) updates.get("taskId");
             if (taskId != null) {
                 subtask.setTask(taskRepository.findById(taskId)
-                    .orElseThrow(() -> new RuntimeException("Task not found with id: " + taskId)));
+                    .orElseThrow(() -> new IllegalArgumentException("Task not found with id: " + taskId)));
             }
         }
         if (updates.containsKey("taskOrder")) {
@@ -157,7 +161,7 @@ public class SubtaskService {
             Integer statusId = (Integer) updates.get("statusId");
             if (statusId != null) {
                 subtask.setStatus(subtaskStatusRepository.findById(statusId)
-                    .orElseThrow(() -> new RuntimeException("SubtaskStatus not found with id: " + statusId)));
+                    .orElseThrow(() -> new IllegalArgumentException("SubtaskStatus not found with id: " + statusId)));
             }
         }
         
