@@ -108,8 +108,10 @@ public class SubtaskService {
         subtask.setStatus(subtaskDetails.getStatus());
         subtask.setIsAiBreakdown(subtaskDetails.getIsAiBreakdown());
         if (subtaskDetails.getStatus() != null && subtaskDetails.getStatus().getId() != null) {
-            subtask.setStatus(subtaskStatusRepository.findById(subtaskDetails.getStatus().getId())
-                .orElseThrow(() -> new IllegalArgumentException("SubtaskStatus not found with id: " + subtaskDetails.getStatus().getId())));
+            SubtaskStatus status = subtaskStatusRepository.findById(subtaskDetails.getStatus().getId())
+                    .orElseThrow(() -> new RuntimeException("Invalid Status ID"));
+            subtask.setStatus(status);
+
         } else if (subtaskDetails.getStatus() != null && subtaskDetails.getStatus().getId() == null) {
             throw new IllegalArgumentException("Status ID is required if status is provided");
         }
@@ -137,9 +139,8 @@ public class SubtaskService {
         if (updates.containsKey("taskOrder")) {
             subtask.setTaskOrder((Integer) updates.get("taskOrder"));
         }
-        if (updates.containsKey("startTime")) {
-            // Assuming startTime is sent as LocalDateTime or string, but for simplicity, cast
-            subtask.setStartTime((LocalDateTime) updates.get("startTime"));
+        if (updates.containsKey("startTime") && updates.get("startTime") != null) {
+            subtask.setStartTime(LocalDateTime.parse(updates.get("startTime").toString()));
         }
         if (updates.containsKey("duration")) {
             subtask.setDuration((Integer) updates.get("duration"));
@@ -159,12 +160,13 @@ public class SubtaskService {
         if (updates.containsKey("isAiBreakdown")) {
             subtask.setIsAiBreakdown((Boolean) updates.get("isAiBreakdown"));
         }
-        if (updates.containsKey("statusId")) {
-            Integer statusId = (Integer) updates.get("statusId");
-            if (statusId != null) {
-                subtask.setStatus(subtaskStatusRepository.findById(statusId)
-                    .orElseThrow(() -> new IllegalArgumentException("SubtaskStatus not found with id: " + statusId)));
-            }
+        if (updates.containsKey("statusId") && updates.get("statusId") != null) {
+            Number statusIdNum = (Number) updates.get("statusId");
+            Integer statusId = statusIdNum.intValue();
+
+            subtask.setStatus(subtaskStatusRepository.findById(statusId)
+                    .orElseThrow(() -> new IllegalArgumentException("Status not found: " + statusId)));
+
         }
         
         return subtaskRepository.save(subtask);

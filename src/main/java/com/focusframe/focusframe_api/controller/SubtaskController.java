@@ -123,15 +123,14 @@ public class SubtaskController {
         }
     }
     
+
     @PutMapping("/{id}")
-    public ResponseEntity<Subtask> updateSubtask(@PathVariable Integer id, @RequestBody Subtask subtask) {
+    public ResponseEntity<?> updateSubtask(@PathVariable Integer id, @RequestBody Subtask subtask) {
         try {
-            Subtask updatedSubtask = subtaskService.updateSubtask(id, subtask);
-            return ResponseEntity.ok(updatedSubtask);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(subtaskService.updateSubtask(id, subtask));
+        } catch (Exception e) {
+            System.out.println("UPDATE ERROR: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
     
