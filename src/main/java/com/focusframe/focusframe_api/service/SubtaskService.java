@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -64,12 +63,13 @@ public class SubtaskService {
 //                .collect(Collectors.toList());
 //    }
 
-    public List<SubTaskDto> getDueTodayUpcomingOrOngoing(Integer userId, Sort sort) {
-        LocalTime nowTime = LocalTime.now();
+    public List<SubTaskDto> getDueTodayUpcomingOrOngoing(Integer userId) {
+        LocalDateTime now = LocalDateTime.now();
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime endOfDay = LocalDate.now().atTime(23, 59, 59, 999_999_999);
+        Sort sort = Sort.by("startTime").descending();
 
-        return subtaskRepository.findDueTodayUpcomingOrOngoingByUserId(userId, startOfDay, endOfDay, nowTime, sort)
+        return subtaskRepository.findDueTodayUpcomingOrOngoing(userId, startOfDay, endOfDay, now, sort)
                 .stream()
                 .map(SubTaskDto::from)
                 .collect(Collectors.toList());
