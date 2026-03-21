@@ -2,22 +2,15 @@ package com.focusframe.focusframe_api.controller;
 
 import com.focusframe.focusframe_api.dto.subTasksDto.SubTaskDto;
 import com.focusframe.focusframe_api.model.Subtask;
-import com.focusframe.focusframe_api.model.Task;
 import com.focusframe.focusframe_api.service.SubtaskService;
-import com.focusframe.focusframe_api.service.TaskService;
-import com.focusframe.focusframe_api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 @RestController
@@ -27,10 +20,6 @@ public class SubtaskController {
     
     @Autowired
     private SubtaskService subtaskService;
-    @Autowired
-    private TaskService taskService;
-    @Autowired
-    private UserService userService;
 
     
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
@@ -71,6 +60,26 @@ public class SubtaskController {
             @PathVariable Integer taskId, 
             @PathVariable Boolean completed) {
         return ResponseEntity.ok(subtaskService.getSubtasksByTaskIdAndCompleted(taskId, completed));
+    }
+
+    @GetMapping("/due-today")
+    public ResponseEntity<List<SubTaskDto>> getDueTodayUpcomingOrOngoingSubtasks(
+            @RequestParam(defaultValue = "startTime") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+
+        if (!ALLOWED_SORT_FIELDS.contains(sortBy)) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (!ALLOWED_DIRECTIONS.contains(direction.toLowerCase())) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        return ResponseEntity.ok(subtaskService.getDueTodayUpcomingOrOngoing(sort));
     }
 //
 //
