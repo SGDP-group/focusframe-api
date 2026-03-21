@@ -90,6 +90,9 @@ public class Subtask {
         if (isAiBreakdown == null) {
             isAiBreakdown = false;
         }
+        if (status == null) {
+            status = SubtaskStatus.builder().id(1).build();
+        }
     }
     
     @PreUpdate
