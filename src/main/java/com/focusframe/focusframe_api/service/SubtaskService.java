@@ -62,10 +62,11 @@ public class SubtaskService {
 //                .collect(Collectors.toList());
 //    }
 
-    public List<SubTaskDto> getDueTodayUpcomingOrOngoing(Integer userId) {
-        Sort sort = Sort.by("startTime").descending();
+    public List<SubTaskDto> getDueTodayUpcomingOrOngoing(Integer userId, LocalDateTime deviceNow) {
+        LocalDateTime startOfDay = deviceNow.toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = deviceNow.toLocalDate().atTime(java.time.LocalTime.MAX);
 
-        return subtaskRepository.findDueTodayUpcomingOrOngoing(userId, sort)
+        return subtaskRepository.findDueTodayUpcomingOrOngoing(userId, startOfDay, endOfDay, deviceNow)
                 .stream()
                 .map(SubTaskDto::from)
                 .collect(Collectors.toList());

@@ -12,9 +12,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,6 +28,9 @@ import java.util.Set;
 @RequestMapping("/api/subtasks")
 @CrossOrigin(origins = "*")
 public class SubtaskController {
+
+    private static final DateTimeFormatter DEVICE_DATE_FMT = DateTimeFormatter.ISO_LOCAL_DATE;
+    private static final DateTimeFormatter DEVICE_TIME_FMT = DateTimeFormatter.ofPattern("HHmmss");
     
     @Autowired
     private SubtaskService subtaskService;
@@ -74,8 +81,35 @@ public class SubtaskController {
 
     @GetMapping("/due-today")
     public ResponseEntity<List<SubTaskDto>> getDueTodayUpcomingOrOngoingSubtasks(
-            @RequestParam Integer userId) {
-        return ResponseEntity.ok(subtaskService.getDueTodayUpcomingOrOngoing(userId));
+            @RequestParam Integer userId,
+            @RequestParam(required = false) String deviceDate,
+            @RequestParam(required = false) String deviceTime,
+            @RequestParam(required = false) Long deviceEpoch,
+            @RequestParam(required = false) Integer tzOffsetMinutes) {
+        LocalDateTime deviceNow = resolveDeviceNow(deviceDate, deviceTime, deviceEpoch, tzOffsetMinutes);
+        return ResponseEntity.ok(subtaskService.getDueTodayUpcomingOrOngoing(userId, deviceNow));
+    }
+
+    private LocalDateTime resolveDeviceNow(String deviceDate,
+                                           String deviceTime,
+                                           Long deviceEpoch,
+                                           Integer tzOffsetMinutes) {
+        if (deviceDate != null && deviceTime != null) {
+            try {
+                LocalDate date = LocalDate.parse(deviceDate, DEVICE_DATE_FMT);
+                LocalTime time = LocalTime.parse(deviceTime, DEVICE_TIME_FMT);
+                return LocalDateTime.of(date, time);
+            } catch (DateTimeParseException ignored) {
+                /* Fall through to epoch fallback. */
+            }
+        }
+
+        if (deviceEpoch != null && tzOffsetMinutes != null) {
+            ZoneOffset offset = ZoneOffset.ofTotalSeconds(tzOffsetMinutes * 60);
+            return LocalDateTime.ofInstant(Instant.ofEpochSecond(deviceEpoch), offset);
+        }
+
+        return LocalDateTime.now();
     }
 //
 //
