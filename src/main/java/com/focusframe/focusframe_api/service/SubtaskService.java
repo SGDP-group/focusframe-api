@@ -99,11 +99,13 @@ public class SubtaskService {
         }
         subtask.setTaskOrder(subtaskDetails.getTaskOrder());
         subtask.setStartTime(subtaskDetails.getStartTime());
+        subtask.setEndTime(subtaskDetails.getEndTime());
         subtask.setDuration(subtaskDetails.getDuration());
         subtask.setEstimatedTime(subtaskDetails.getEstimatedTime());
         subtask.setCompleted(subtaskDetails.getCompleted());
         subtask.setProductive(subtaskDetails.getProductive());
         subtask.setIsTracked(subtaskDetails.getIsTracked());
+        subtask.setStatus(subtaskDetails.getStatus());
         subtask.setIsAiBreakdown(subtaskDetails.getIsAiBreakdown());
         if (subtaskDetails.getStatus() != null && subtaskDetails.getStatus().getId() != null) {
             subtask.setStatus(subtaskStatusRepository.findById(subtaskDetails.getStatus().getId())
