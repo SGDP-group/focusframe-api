@@ -2,6 +2,7 @@ package com.focusframe.focusframe_api.service;
 
 import com.focusframe.focusframe_api.dto.subTasksDto.SubTaskDto;
 import com.focusframe.focusframe_api.model.Subtask;
+import com.focusframe.focusframe_api.model.SubtaskStatus;
 import com.focusframe.focusframe_api.repository.SubtaskRepository;
 import com.focusframe.focusframe_api.repository.TaskRepository;
 import com.focusframe.focusframe_api.repository.SubtaskStatusRepository;
@@ -67,6 +68,20 @@ public class SubtaskService {
 
     
     public Subtask createSubtask(Subtask subtask) {
+        if (subtask.getTask() != null && subtask.getTask().getId() != null) {
+            subtask.setTask(taskRepository.findById(subtask.getTask().getId())
+                .orElseThrow(() -> new RuntimeException("Task not found")));
+        }
+
+        if (subtask.getStatus() == null) {
+            SubtaskStatus defaultStatus = subtaskStatusRepository.findById(1)
+                .orElseThrow(() -> new RuntimeException("Default status not found"));
+            subtask.setStatus(defaultStatus);
+        } else if (subtask.getStatus().getId() != null) {
+            subtask.setStatus(subtaskStatusRepository.findById(subtask.getStatus().getId())
+                .orElseThrow(() -> new RuntimeException("Status not found")));
+        }
+        
         return subtaskRepository.save(subtask);
     }
     
