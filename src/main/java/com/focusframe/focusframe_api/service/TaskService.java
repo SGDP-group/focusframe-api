@@ -41,11 +41,12 @@ public class TaskService {
         return taskRepository.save(task);
     }
     
-    public Task updateTask(Integer id, String name, Integer userId) {
+    public Task updateTask(Integer id, String name,String description, Integer userId) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
         
         task.setName(name);
+        task.setDescription(description);
         task.setUser(userRepository.getReferenceById(userId));
         return taskRepository.save(task);
     }

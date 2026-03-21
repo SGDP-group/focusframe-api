@@ -47,8 +47,9 @@ public class TaskController {
     public ResponseEntity<Task> updateTask(@PathVariable Integer id, @RequestBody Map<String, Object> updateData) {
         try {
             String name = (String) updateData.get("name");
+            String description = (String) updateData.get("description");
             Integer userId = (Integer) updateData.get("userId");
-            Task updatedTask = taskService.updateTask(id, name, userId);
+            Task updatedTask = taskService.updateTask(id, name,description, userId);
             return ResponseEntity.ok(updatedTask);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
