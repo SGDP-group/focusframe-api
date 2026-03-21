@@ -22,12 +22,19 @@ public interface SubtaskRepository extends JpaRepository<Subtask, Integer> {
     List<Subtask> findByStartTimeBetweenAndCompletedFalse(LocalDateTime startTimeDateDay, LocalDateTime endTimeDateDay, Sort sort);
     List<Subtask> findByTask_IdAndStartTimeBetweenAndCompletedFalse(Integer taskId, LocalDateTime startTimeDateDay, LocalDateTime endTimeDateDay, Sort sort);
 
-        @Query("""
+    @Query("""
         SELECT s FROM Subtask s
         WHERE s.task.user.id = :userId
+          AND s.completed = false
+          AND s.startTime IS NOT NULL
+          AND s.endTime IS NOT NULL
+          AND s.startTime BETWEEN :startOfDay AND :endOfDay
+          AND s.endTime >= :deviceNow
         ORDER BY s.startTime ASC
         """)
-        List<Subtask> findDueTodayUpcomingOrOngoing(
+    List<Subtask> findDueTodayUpcomingOrOngoing(
             @Param("userId") Integer userId,
-            Sort sort);
+            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("endOfDay") LocalDateTime endOfDay,
+            @Param("deviceNow") LocalDateTime deviceNow);
 }
