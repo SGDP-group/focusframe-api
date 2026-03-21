@@ -64,6 +64,7 @@ public class SubtaskController {
 
     @GetMapping("/due-today")
     public ResponseEntity<List<SubTaskDto>> getDueTodayUpcomingOrOngoingSubtasks(
+            @RequestParam Integer userId,
             @RequestParam(defaultValue = "startTime") String sortBy,
             @RequestParam(defaultValue = "asc") String direction) {
 
@@ -79,7 +80,7 @@ public class SubtaskController {
                 ? Sort.by(sortBy).descending()
                 : Sort.by(sortBy).ascending();
 
-        return ResponseEntity.ok(subtaskService.getDueTodayUpcomingOrOngoing(sort));
+        return ResponseEntity.ok(subtaskService.getDueTodayUpcomingOrOngoing(userId, sort));
     }
 //
 //
