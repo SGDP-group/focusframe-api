@@ -41,6 +41,17 @@ public class AuthToken {
     @Column(nullable = false, unique = true)
     private String token;
 
+    public Boolean getExpired() {
+        return isExpired;
+    }
+
+    public void setExpired(Boolean expired) {
+        isExpired = expired;
+    }
+
+    @Column(nullable = false)
+    private Boolean isExpired;
+
     public AuthToken() {}
 
     public AuthToken(String ipAddress, String token) {

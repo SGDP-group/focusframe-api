@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -21,5 +22,20 @@ public class AuthService {
         AuthToken authToken = new AuthToken(ipAddress, token);
 
         return authRepository.save(authToken);
+    }
+
+    public Boolean AuthenticateToken (String userToken) {
+        try {
+            Optional<AuthToken> token =  authRepository.findByToken(userToken);
+
+            if ((token.isEmpty()) ||(token.get().getExpired())) {
+                return false;
+            }
+        } catch (Exception e) {
+            // implement logger here to properly capture error
+            return false;
+        }
+        authRepository.setAuthAsExpired(userToken);
+        return true;
     }
 }
