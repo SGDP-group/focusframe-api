@@ -179,7 +179,7 @@ public class SubtaskService {
         }
         if (updates.containsKey("statusId") && updates.get("statusId") != null) {
             Number statusIdNum = (Number) updates.get("statusId");
-            Integer statusId = statusIdNum.intValue();
+            int statusId = statusIdNum.intValue();
 
             subtask.setStatus(subtaskStatusRepository.findById(statusId)
                     .orElseThrow(() -> new IllegalArgumentException("Status not found: " + statusId)));
