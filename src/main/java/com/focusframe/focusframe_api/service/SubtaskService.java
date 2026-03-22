@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -157,7 +158,10 @@ public class SubtaskService {
             subtask.setTaskOrder((Integer) updates.get("taskOrder"));
         }
         if (updates.containsKey("startTime") && updates.get("startTime") != null) {
-            subtask.setStartTime(LocalDateTime.parse(updates.get("startTime").toString()));
+            subtask.setStartTime(parseFlexibleDateTime(updates.get("startTime").toString()));
+        }
+        if (updates.containsKey("endTime") && updates.get("endTime") != null) {
+            subtask.setEndTime(parseFlexibleDateTime(updates.get("endTime").toString()));
         }
         if (updates.containsKey("duration")) {
             subtask.setDuration((Integer) updates.get("duration"));
@@ -193,5 +197,27 @@ public class SubtaskService {
         Subtask subtask = subtaskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Subtask not found with id: " + id));
         subtaskRepository.delete(subtask);
+    }
+
+
+
+    private LocalDateTime parseFlexibleDateTime(String dateStr) {
+        if (dateStr == null) {
+            return null;
+        }
+        // Remove trailing 'Z' if present
+        if (dateStr.endsWith("Z")) {
+            dateStr = dateStr.substring(0, dateStr.length() - 1);
+        }
+        try {
+            return LocalDateTime.parse(dateStr);
+        } catch (Exception e) {
+            // Fallback to OffsetDateTime if needed
+            try {
+                return OffsetDateTime.parse(dateStr + "Z").toLocalDateTime();
+            } catch (Exception e2) {
+                throw new IllegalArgumentException("Invalid date format. Expected ISO date-time format.");
+            }
+        }
     }
 }
