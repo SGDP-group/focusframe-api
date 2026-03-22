@@ -17,6 +17,6 @@ public interface AuthRepository extends JpaRepository<AuthToken, Long> {
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE auth_tokens SET expired_status = 1 WHERE token = :token", nativeQuery = true)
+    @Query(value = "UPDATE auth_tokens SET is_expired = true WHERE token = :token", nativeQuery = true)
     void setAuthAsExpired(@Param("token") String token);
 }
