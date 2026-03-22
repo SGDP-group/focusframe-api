@@ -1,0 +1,1 @@
+ALTER TABLE users ADD COLUMN maximum_time_per_task INT;
