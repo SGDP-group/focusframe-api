@@ -20,6 +20,11 @@ public class AuthToken {
 
     @Getter
     @Setter
+    @Column(nullable = false)
+    private String callbackUrl;
+
+    @Getter
+    @Setter
     @Column(nullable = false, unique = true)
     private String token;
 
@@ -34,10 +39,16 @@ public class AuthToken {
     @Column(nullable = false)
     private Boolean isExpired = false;
 
+    @Column(nullable = true)
+    @Getter
+    @Setter
+    private Integer userId;
+
     public AuthToken() {}
 
-    public AuthToken(String ipAddress, String token) {
+    public AuthToken(String ipAddress, String callbackUrl, String token) {
         this.ipAddress = ipAddress;
+        this.callbackUrl = callbackUrl;
         this.token = token;
     }
 }
