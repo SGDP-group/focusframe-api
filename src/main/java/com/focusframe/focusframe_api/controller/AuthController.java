@@ -19,11 +19,20 @@ public class AuthController {
     }
 
     @PostMapping("/generate")
-    public ResponseEntity<AuthToken> generateToken(@RequestBody String ip)
+    public ResponseEntity<AuthToken> generateToken(@RequestBody Map<String, String> payload)
     {
         log.info("AuthController|generateToken|Initialized");
         try {
-            AuthToken authToken = authService.GenerateAndSaveAuth(ip);
+            String ipAddress = payload.get("ip");
+            String callbackUrl = payload.get("callbackUrl");
+
+            if (ipAddress == null || ipAddress.isBlank()
+                    || callbackUrl == null || callbackUrl.isBlank()) {
+                log.error("AuthController|generateToken|missing ipAddress or callbackUrl");
+                return ResponseEntity.badRequest().build();
+            }
+
+            AuthToken authToken = authService.GenerateAndSaveAuth(ipAddress, callbackUrl);
             log.info("AuthController|Success|Response:" + authToken);
             return ResponseEntity.ok(authToken);
         } catch (Exception e) {
@@ -38,11 +47,12 @@ public class AuthController {
         log.info("AuthController|authenticateToken|Initialized");
         try {
             String token = payload.get("token");
+            String email = payload.get("email");
             if (token == null || token.isBlank()) {
                 log.error("AuthController|authenticateToken|missing token in request body");
                 return false;
             }
-            return authService.AuthenticateToken(token);
+            return authService.AuthenticateToken(token, email);
         } catch (Exception e) {
             log.error("AuthController|authenticateToken|failure|" + e);
             return false;
