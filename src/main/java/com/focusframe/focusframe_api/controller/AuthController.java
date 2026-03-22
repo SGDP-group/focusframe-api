@@ -5,10 +5,7 @@ import com.focusframe.focusframe_api.service.AuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/authToken")
@@ -31,6 +28,16 @@ public class AuthController {
         } catch (Exception e) {
             log.info("AuthController|Failure|" + e);
             throw new RuntimeException(e);
+        }
+    }
+
+    @PutMapping("/authenticate")
+    public Boolean authenticateToken (@RequestBody String token) {
+        try {
+            return authService.AuthenticateToken(token);
+        } catch (RuntimeException e) {
+            log.error("AuthController|authenticateToken|failure|" + e);
+            return false;
         }
     }
 }
