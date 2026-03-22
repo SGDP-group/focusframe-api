@@ -1,43 +1,25 @@
 package com.focusframe.focusframe_api.model;
 
 import jakarta.persistence.*;
-
-import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "auth_tokens")
 public class AuthToken {
+    @Getter
+    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getIpAddress() {
-        return ipAddress;
-    }
-
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
+    @Getter
+    @Setter
     @Column(nullable = false)
     private String ipAddress;
 
+    @Getter
+    @Setter
     @Column(nullable = false, unique = true)
     private String token;
 
@@ -50,7 +32,7 @@ public class AuthToken {
     }
 
     @Column(nullable = false)
-    private Boolean isExpired;
+    private Boolean isExpired = false;
 
     public AuthToken() {}
 
