@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,6 +28,13 @@ public class SubtaskService {
     
     @Autowired
     private SubtaskStatusRepository subtaskStatusRepository;
+
+    @Autowired
+    public SubtaskService(TaskRepository taskRepository, SubtaskStatusRepository subtaskStatusRepository, SubtaskRepository subtaskRepository) {
+        this.taskRepository = taskRepository;
+        this.subtaskStatusRepository = subtaskStatusRepository;
+        this.subtaskRepository = subtaskRepository;
+    }
     
     public List<Subtask> getAllSubtasks() {
         return subtaskRepository.findAll();
@@ -109,15 +117,19 @@ public class SubtaskService {
         }
         subtask.setTaskOrder(subtaskDetails.getTaskOrder());
         subtask.setStartTime(subtaskDetails.getStartTime());
+        subtask.setEndTime(subtaskDetails.getEndTime());
         subtask.setDuration(subtaskDetails.getDuration());
         subtask.setEstimatedTime(subtaskDetails.getEstimatedTime());
         subtask.setCompleted(subtaskDetails.getCompleted());
         subtask.setProductive(subtaskDetails.getProductive());
         subtask.setIsTracked(subtaskDetails.getIsTracked());
+        subtask.setStatus(subtaskDetails.getStatus());
         subtask.setIsAiBreakdown(subtaskDetails.getIsAiBreakdown());
         if (subtaskDetails.getStatus() != null && subtaskDetails.getStatus().getId() != null) {
-            subtask.setStatus(subtaskStatusRepository.findById(subtaskDetails.getStatus().getId())
-                .orElseThrow(() -> new IllegalArgumentException("SubtaskStatus not found with id: " + subtaskDetails.getStatus().getId())));
+            SubtaskStatus status = subtaskStatusRepository.findById(subtaskDetails.getStatus().getId())
+                    .orElseThrow(() -> new RuntimeException("Invalid Status ID"));
+            subtask.setStatus(status);
+
         } else if (subtaskDetails.getStatus() != null && subtaskDetails.getStatus().getId() == null) {
             throw new IllegalArgumentException("Status ID is required if status is provided");
         }
@@ -145,9 +157,11 @@ public class SubtaskService {
         if (updates.containsKey("taskOrder")) {
             subtask.setTaskOrder((Integer) updates.get("taskOrder"));
         }
-        if (updates.containsKey("startTime")) {
-            // Assuming startTime is sent as LocalDateTime or string, but for simplicity, cast
-            subtask.setStartTime((LocalDateTime) updates.get("startTime"));
+        if (updates.containsKey("startTime") && updates.get("startTime") != null) {
+            subtask.setStartTime(parseFlexibleDateTime(updates.get("startTime").toString()));
+        }
+        if (updates.containsKey("endTime") && updates.get("endTime") != null) {
+            subtask.setEndTime(parseFlexibleDateTime(updates.get("endTime").toString()));
         }
         if (updates.containsKey("duration")) {
             subtask.setDuration((Integer) updates.get("duration"));
@@ -167,12 +181,13 @@ public class SubtaskService {
         if (updates.containsKey("isAiBreakdown")) {
             subtask.setIsAiBreakdown((Boolean) updates.get("isAiBreakdown"));
         }
-        if (updates.containsKey("statusId")) {
-            Integer statusId = (Integer) updates.get("statusId");
-            if (statusId != null) {
-                subtask.setStatus(subtaskStatusRepository.findById(statusId)
-                    .orElseThrow(() -> new IllegalArgumentException("SubtaskStatus not found with id: " + statusId)));
-            }
+        if (updates.containsKey("statusId") && updates.get("statusId") != null) {
+            Number statusIdNum = (Number) updates.get("statusId");
+            int statusId = statusIdNum.intValue();
+
+            subtask.setStatus(subtaskStatusRepository.findById(statusId)
+                    .orElseThrow(() -> new IllegalArgumentException("Status not found: " + statusId)));
+
         }
         
         return subtaskRepository.save(subtask);
@@ -182,5 +197,27 @@ public class SubtaskService {
         Subtask subtask = subtaskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Subtask not found with id: " + id));
         subtaskRepository.delete(subtask);
+    }
+
+
+
+    private LocalDateTime parseFlexibleDateTime(String dateStr) {
+        if (dateStr == null) {
+            return null;
+        }
+        // Remove trailing 'Z' if present
+        if (dateStr.endsWith("Z")) {
+            dateStr = dateStr.substring(0, dateStr.length() - 1);
+        }
+        try {
+            return LocalDateTime.parse(dateStr);
+        } catch (Exception e) {
+            // Fallback to OffsetDateTime if needed
+            try {
+                return OffsetDateTime.parse(dateStr + "Z").toLocalDateTime();
+            } catch (Exception e2) {
+                throw new IllegalArgumentException("Invalid date format. Expected ISO date-time format.");
+            }
+        }
     }
 }

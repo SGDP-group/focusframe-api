@@ -39,6 +39,13 @@ public class SubtaskController {
     @Autowired
     private UserService userService;
 
+
+    public SubtaskController(UserService userService, TaskService taskService, SubtaskService subtaskService) {
+        this.userService = userService;
+        this.taskService = taskService;
+        this.subtaskService = subtaskService;
+    }
+
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
             "id", "taskName", "taskId", "name", "description", "taskOrder", "startTime", "endTime", "duration", "estimatedTime"
     );
@@ -162,27 +169,27 @@ public class SubtaskController {
         }
     }
     
+
     @PutMapping("/{id}")
-    public ResponseEntity<Subtask> updateSubtask(@PathVariable Integer id, @RequestBody Subtask subtask) {
+    public ResponseEntity<?> updateSubtask(@PathVariable Integer id, @RequestBody Subtask subtask) {
         try {
-            Subtask updatedSubtask = subtaskService.updateSubtask(id, subtask);
-            return ResponseEntity.ok(updatedSubtask);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(subtaskService.updateSubtask(id, subtask));
+        } catch (Exception e) {
+            System.out.println("UPDATE ERROR: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
     
     @PatchMapping("/{id}")
-    public ResponseEntity<Subtask> partialUpdateSubtask(@PathVariable Integer id, @RequestBody Map<String, Object> updates) {
+    public ResponseEntity<?> partialUpdateSubtask(@PathVariable Integer id, @RequestBody Map<String, Object> updates) {
         try {
             Subtask updatedSubtask = subtaskService.partialUpdateSubtask(id, updates);
             return ResponseEntity.ok(updatedSubtask);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            System.out.println("PATCH ERROR: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
     

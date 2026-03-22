@@ -19,6 +19,12 @@ public class TaskController {
     @Autowired
     private TaskService taskService;
     private UserService userService;
+
+    @Autowired
+    public TaskController(UserService userService, TaskService taskService) {
+        this.userService = userService;
+        this.taskService = taskService;
+    }
     
     @GetMapping
     public ResponseEntity<List<Task>> getAllTasks() {
