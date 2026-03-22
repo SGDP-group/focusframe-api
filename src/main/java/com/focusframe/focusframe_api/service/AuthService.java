@@ -1,5 +1,6 @@
 package com.focusframe.focusframe_api.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.focusframe.focusframe_api.controller.AuthController;
 import com.focusframe.focusframe_api.model.AuthToken;
 import com.focusframe.focusframe_api.model.User;
@@ -8,6 +9,9 @@ import com.focusframe.focusframe_api.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -100,12 +104,21 @@ public class AuthService {
         }
         CallbackPayload payload = new CallbackPayload(tokenWithUser.getToken(), tokenWithUser.getUserId());
         try {
-            restTemplate.postForEntity(targetUrl, payload, Void.class);
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonPayload = mapper.writeValueAsString(payload);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Content-Type", "application/json;charset=UTF-8");
+            HttpEntity<String> request = new HttpEntity<>(jsonPayload, headers);
+            log.info("AuthService|sendCallback|sending|payload={} headers={}", jsonPayload, headers);
+            restTemplate.postForEntity(targetUrl, request, Void.class);
             log.info("AuthService|sendCallback|success|url={} token={} userId={}",
                     targetUrl, tokenWithUser.getToken(), tokenWithUser.getUserId());
         } catch (RestClientException e) {
             log.error("AuthService|sendCallback|failure|url={} token={} userId={} error={}",
-                    targetUrl, tokenWithUser.getToken(), tokenWithUser.getUserId(), e.getMessage());
+                    targetUrl, tokenWithUser.getToken(), tokenWithUser.getUserId(), e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("AuthService|sendCallback|error|{}", e.toString(), e);
         }
     }
 
