@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/authToken")
@@ -20,7 +21,7 @@ public class AuthController {
     @PostMapping("/generate")
     public ResponseEntity<AuthToken> generateToken(@RequestBody String ip)
     {
-        log.info("AuthController|Initialized");
+        log.info("AuthController|generateToken|Initialized");
         try {
             AuthToken authToken = authService.GenerateAndSaveAuth(ip);
             log.info("AuthController|Success|Response:" + authToken);
@@ -32,10 +33,17 @@ public class AuthController {
     }
 
     @PutMapping("/authenticate")
-    public Boolean authenticateToken (@RequestBody String token) {
+    public Boolean authenticateToken (@RequestBody Map<String, String> payload) {
+
+        log.info("AuthController|authenticateToken|Initialized");
         try {
+            String token = payload.get("token");
+            if (token == null || token.isBlank()) {
+                log.error("AuthController|authenticateToken|missing token in request body");
+                return false;
+            }
             return authService.AuthenticateToken(token);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             log.error("AuthController|authenticateToken|failure|" + e);
             return false;
         }
