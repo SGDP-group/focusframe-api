@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.security.PrivilegedAction;
 import java.time.LocalDateTime;
 
 @Entity
@@ -23,7 +24,10 @@ public class Subtask {
     
     @Column(nullable = false)
     private String name;
-    
+
+    @Column(unique = true)
+    private String googleEventId;
+
     @Column(columnDefinition = "TEXT")
     private String description;
     

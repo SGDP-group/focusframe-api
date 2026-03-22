@@ -27,6 +27,13 @@ public class SubtaskService {
     
     @Autowired
     private SubtaskStatusRepository subtaskStatusRepository;
+
+    @Autowired
+    public SubtaskService(TaskRepository taskRepository, SubtaskStatusRepository subtaskStatusRepository, SubtaskRepository subtaskRepository) {
+        this.taskRepository = taskRepository;
+        this.subtaskStatusRepository = subtaskStatusRepository;
+        this.subtaskRepository = subtaskRepository;
+    }
     
     public List<Subtask> getAllSubtasks() {
         return subtaskRepository.findAll();

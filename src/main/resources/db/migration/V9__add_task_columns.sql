@@ -2,4 +2,3 @@ ALTER TABLE tasks ADD COLUMN description TEXT;
 ALTER TABLE tasks ADD COLUMN duration INTEGER;
 ALTER TABLE tasks ADD COLUMN focus_time INTEGER;
 ALTER TABLE tasks ADD COLUMN break_time INTEGER;
-

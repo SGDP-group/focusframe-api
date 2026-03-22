@@ -39,6 +39,13 @@ public class SubtaskController {
     @Autowired
     private UserService userService;
 
+
+    public SubtaskController(UserService userService, TaskService taskService, SubtaskService subtaskService) {
+        this.userService = userService;
+        this.taskService = taskService;
+        this.subtaskService = subtaskService;
+    }
+
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
             "id", "taskName", "taskId", "name", "description", "taskOrder", "startTime", "endTime", "duration", "estimatedTime"
     );
