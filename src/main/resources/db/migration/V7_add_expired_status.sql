@@ -1,0 +1,1 @@
+ALTER TABLE auth_tokens ADD COLUMN expired_status INT DEFAULT 0;
