@@ -181,14 +181,14 @@ public class SubtaskController {
     }
     
     @PatchMapping("/{id}")
-    public ResponseEntity<Subtask> partialUpdateSubtask(@PathVariable Integer id, @RequestBody Map<String, Object> updates) {
+    public ResponseEntity<?> partialUpdateSubtask(@PathVariable Integer id, @RequestBody Map<String, Object> updates) {
         try {
             Subtask updatedSubtask = subtaskService.partialUpdateSubtask(id, updates);
             return ResponseEntity.ok(updatedSubtask);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
     

@@ -15,7 +15,8 @@ public record SubTaskDto(
         Integer duration,
         Integer estimatedTime,
         Boolean completed,
-        String statusName
+        String statusName,
+        String googleEventId
 
 
 
@@ -32,6 +33,7 @@ public record SubTaskDto(
                 subTask.getDuration(),
                 subTask.getEstimatedTime(),
                 subTask.getCompleted(),
-                subTask.getStatus().getName()
+                subTask.getStatus().getName(),
+                subTask.getGoogleEventId()
         );
     }}
