@@ -1,11 +1,15 @@
 package com.focusframe.focusframe_api.controller;
 
+import com.focusframe.focusframe_api.dto.scheduleSubtaskDto.ScheduleSubtaskRequest;
+import com.focusframe.focusframe_api.dto.scheduleSubtaskDto.ScheduleSubtaskResponse;
 import com.focusframe.focusframe_api.dto.subTasksDto.SubTaskDto;
 import com.focusframe.focusframe_api.model.Subtask;
 import com.focusframe.focusframe_api.model.Task;
+import com.focusframe.focusframe_api.service.SubtaskSchedulingService;
 import com.focusframe.focusframe_api.service.SubtaskService;
 import com.focusframe.focusframe_api.service.TaskService;
 import com.focusframe.focusframe_api.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -38,6 +42,8 @@ public class SubtaskController {
     private TaskService taskService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private SubtaskSchedulingService subtaskSchedulingService;
 
 
     public SubtaskController(UserService userService, TaskService taskService, SubtaskService subtaskService) {
@@ -201,5 +207,19 @@ public class SubtaskController {
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PostMapping("/schedule-subtasks")
+    public ResponseEntity<ScheduleSubtaskResponse> scheduleSubtasks(@Valid @RequestBody ScheduleSubtaskRequest request) {
+        ScheduleSubtaskResponse response = subtaskSchedulingService.scheduleSubtasks(request);
+        
+        if (!response.getSuccess()) {
+            if (response.getMessage() != null && response.getMessage().contains("not found")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+            return ResponseEntity.badRequest().body(response);
+        }
+        
+        return ResponseEntity.ok(response);
     }
 }
