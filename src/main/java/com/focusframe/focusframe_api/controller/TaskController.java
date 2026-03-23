@@ -1,12 +1,8 @@
 package com.focusframe.focusframe_api.controller;
 
-import com.focusframe.focusframe_api.dto.scheduleSubtaskDto.ScheduleSubtaskRequest;
-import com.focusframe.focusframe_api.dto.scheduleSubtaskDto.ScheduleSubtaskResponse;
 import com.focusframe.focusframe_api.model.Task;
-import com.focusframe.focusframe_api.service.SubtaskSchedulingService;
 import com.focusframe.focusframe_api.service.TaskService;
 import com.focusframe.focusframe_api.service.UserService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +18,6 @@ public class TaskController {
     
     @Autowired
     private TaskService taskService;
-    @Autowired
-    private SubtaskSchedulingService subtaskSchedulingService;
     private UserService userService;
 
     @Autowired
@@ -81,25 +75,5 @@ public class TaskController {
     @GetMapping("/user/{userId}/incomplete-today-or-before")
     public ResponseEntity<List<Task>> getTasksWithIncompleteSubtasksBeforeOrOnToday(@PathVariable Integer userId) {
         return ResponseEntity.ok(taskService.getTasksWithIncompleteSubtasksBeforeOrOnToday(userId));
-    }
-
-    @PostMapping("/schedule-subtasks")
-    public ResponseEntity<?> scheduleSubtasks(@Valid @RequestBody ScheduleSubtaskRequest request) {
-        try {
-            ScheduleSubtaskResponse response = subtaskSchedulingService.scheduleSubtasks(request);
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of(
-                    "success", false,
-                    "message", e.getMessage()
-                ));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of(
-                    "success", false,
-                    "message", "Failed to schedule subtasks: " + e.getMessage()
-                ));
-        }
     }
 }

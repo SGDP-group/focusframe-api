@@ -210,22 +210,16 @@ public class SubtaskController {
     }
 
     @PostMapping("/schedule-subtasks")
-    public ResponseEntity<?> scheduleSubtasks(@Valid @RequestBody ScheduleSubtaskRequest request) {
-        try {
-            ScheduleSubtaskResponse response = subtaskSchedulingService.scheduleSubtasks(request);
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of(
-                    "success", false,
-                    "message", e.getMessage()
-                ));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of(
-                    "success", false,
-                    "message", "Failed to schedule subtasks: " + e.getMessage()
-                ));
+    public ResponseEntity<ScheduleSubtaskResponse> scheduleSubtasks(@Valid @RequestBody ScheduleSubtaskRequest request) {
+        ScheduleSubtaskResponse response = subtaskSchedulingService.scheduleSubtasks(request);
+        
+        if (!response.getSuccess()) {
+            if (response.getMessage() != null && response.getMessage().contains("not found")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+            return ResponseEntity.badRequest().body(response);
         }
+        
+        return ResponseEntity.ok(response);
     }
 }

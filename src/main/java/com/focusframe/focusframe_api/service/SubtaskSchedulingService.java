@@ -2,10 +2,8 @@ package com.focusframe.focusframe_api.service;
 
 import com.focusframe.focusframe_api.dto.scheduleSubtaskDto.*;
 import com.focusframe.focusframe_api.model.Subtask;
-import com.focusframe.focusframe_api.model.Task;
 import com.focusframe.focusframe_api.model.User;
 import com.focusframe.focusframe_api.repository.SubtaskRepository;
-import com.focusframe.focusframe_api.repository.TaskRepository;
 import com.focusframe.focusframe_api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,18 +28,11 @@ public class SubtaskSchedulingService {
     private SubtaskRepository subtaskRepository;
 
     @Autowired
-    private TaskRepository taskRepository;
-
-    @Autowired
     private UserRepository userRepository;
 
     // Setters for testing
     public void setSubtaskRepository(SubtaskRepository subtaskRepository) {
         this.subtaskRepository = subtaskRepository;
-    }
-
-    public void setTaskRepository(TaskRepository taskRepository) {
-        this.taskRepository = taskRepository;
     }
 
     public void setUserRepository(UserRepository userRepository) {
@@ -86,8 +77,6 @@ public class SubtaskSchedulingService {
                 .filter(s -> s.getEndTime() != null && s.getEndTime().toLocalDate().equals(requestDate))
             .max(Comparator.comparing(Subtask::getEndTime))
             .orElse(null);
-        
-        LocalDateTime latestExistingEndTime = latestExistingSubtask != null ? latestExistingSubtask.getEndTime() : null;
 
         List<ScheduledSubtaskItem> scheduledSubtasks = new ArrayList<>();
         List<ConflictSummary> conflictSummaries = new ArrayList<>();
@@ -422,7 +411,7 @@ public class SubtaskSchedulingService {
             )
             .build();
 
-        return new ScheduleResult(item, null);  // No longer building ConflictResolution
+        return new ScheduleResult(item, null);
     }
 
     private ConflictInfo buildConflictInfo(Subtask conflictingSubtask) {
