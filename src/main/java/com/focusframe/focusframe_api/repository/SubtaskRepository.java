@@ -37,4 +37,14 @@ public interface SubtaskRepository extends JpaRepository<Subtask, Integer> {
             @Param("startOfDay") LocalDateTime startOfDay,
             @Param("endOfDay") LocalDateTime endOfDay,
             @Param("deviceNow") LocalDateTime deviceNow);
+
+    @Query("""
+        SELECT s FROM Subtask s
+        WHERE s.task.user.id = :userId
+          AND s.completed = false
+          AND s.startTime IS NOT NULL
+          AND s.endTime IS NOT NULL
+        ORDER BY s.startTime ASC
+        """)
+    List<Subtask> findAllUserSubtasksByStartTimeAsc(@Param("userId") Integer userId);
 }
