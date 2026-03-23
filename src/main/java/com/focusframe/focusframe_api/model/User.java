@@ -19,6 +19,8 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(name = "maximum_time_per_task")
+    private Integer maximumTimePerTask;
 
     public User(String email) {
         this.email = email;
