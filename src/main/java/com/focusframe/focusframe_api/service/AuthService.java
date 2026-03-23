@@ -75,10 +75,12 @@ public class AuthService {
     private void waitForUserIdAndNotify(AuthToken savedToken) {
         final int maxAttempts = 150;
         int attempts = 0;
+        log.info("AuthService|waitForUserIdAndNotify|Loop started for token {}", savedToken.getToken());
         while (attempts < maxAttempts) {
             try {
                 Optional<AuthToken> refreshed = authRepository.findByToken(savedToken.getToken());
                 if (refreshed.isPresent() && refreshed.get().getUserId() != null && refreshed.get().getUserId() != 0) {
+                    log.info("AuthService|waitForUserIdAndNotify|Loop ended successfully for token {}", savedToken.getToken());
                     sendCallback(refreshed.get());
                     return;
                 }
