@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/authToken")
+@RequestMapping("/api/authToken")
 public class AuthController {
     private final AuthService authService;
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
@@ -44,7 +44,7 @@ public class AuthController {
     @PutMapping("/authenticate")
     public Boolean authenticateToken (@RequestBody Map<String, String> payload) {
 
-        log.info("AuthController|authenticateToken|Initialized");
+        log.info("AuthController|authenticateToken|Initialized|Request body: token={}, email={}", payload.get("token"), payload.get("email"));
         try {
             String token = payload.get("token");
             String email = payload.get("email");
