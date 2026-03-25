@@ -4,10 +4,14 @@ import com.focusframe.focusframe_api.model.SubtaskStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface SubtaskStatusRepository extends JpaRepository<SubtaskStatus, Integer> {
     Optional<SubtaskStatus> findByName(String name);
     boolean existsByName(String name);
+
+    @Override
+    List<SubtaskStatus> findAll();
 }

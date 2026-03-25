@@ -1,11 +1,15 @@
 package com.focusframe.focusframe_api.controller;
 
+import com.focusframe.focusframe_api.dto.scheduleSubtaskDto.ScheduleSubtaskRequest;
+import com.focusframe.focusframe_api.dto.scheduleSubtaskDto.ScheduleSubtaskResponse;
 import com.focusframe.focusframe_api.dto.subTasksDto.SubTaskDto;
 import com.focusframe.focusframe_api.model.Subtask;
 import com.focusframe.focusframe_api.model.Task;
+import com.focusframe.focusframe_api.service.SubtaskSchedulingService;
 import com.focusframe.focusframe_api.service.SubtaskService;
 import com.focusframe.focusframe_api.service.TaskService;
 import com.focusframe.focusframe_api.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -38,6 +42,15 @@ public class SubtaskController {
     private TaskService taskService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private SubtaskSchedulingService subtaskSchedulingService;
+
+
+    public SubtaskController(UserService userService, TaskService taskService, SubtaskService subtaskService) {
+        this.userService = userService;
+        this.taskService = taskService;
+        this.subtaskService = subtaskService;
+    }
 
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
             "id", "taskName", "taskId", "name", "description", "taskOrder", "startTime", "endTime", "duration", "estimatedTime"
@@ -162,27 +175,27 @@ public class SubtaskController {
         }
     }
     
+
     @PutMapping("/{id}")
-    public ResponseEntity<Subtask> updateSubtask(@PathVariable Integer id, @RequestBody Subtask subtask) {
+    public ResponseEntity<?> updateSubtask(@PathVariable Integer id, @RequestBody Subtask subtask) {
         try {
-            Subtask updatedSubtask = subtaskService.updateSubtask(id, subtask);
-            return ResponseEntity.ok(updatedSubtask);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(subtaskService.updateSubtask(id, subtask));
+        } catch (Exception e) {
+            System.out.println("UPDATE ERROR: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
     
     @PatchMapping("/{id}")
-    public ResponseEntity<Subtask> partialUpdateSubtask(@PathVariable Integer id, @RequestBody Map<String, Object> updates) {
+    public ResponseEntity<?> partialUpdateSubtask(@PathVariable Integer id, @RequestBody Map<String, Object> updates) {
         try {
             Subtask updatedSubtask = subtaskService.partialUpdateSubtask(id, updates);
             return ResponseEntity.ok(updatedSubtask);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            System.out.println("PATCH ERROR: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
     
@@ -194,5 +207,19 @@ public class SubtaskController {
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PostMapping("/schedule-subtasks")
+    public ResponseEntity<ScheduleSubtaskResponse> scheduleSubtasks(@Valid @RequestBody ScheduleSubtaskRequest request) {
+        ScheduleSubtaskResponse response = subtaskSchedulingService.scheduleSubtasks(request);
+        
+        if (!response.getSuccess()) {
+            if (response.getMessage() != null && response.getMessage().contains("not found")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+            return ResponseEntity.badRequest().body(response);
+        }
+        
+        return ResponseEntity.ok(response);
     }
 }

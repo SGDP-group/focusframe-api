@@ -20,6 +20,7 @@ public class TaskService {
     @Autowired
     private  UserRepository  userRepository;
 
+    @Autowired
     public TaskService(UserRepository userRepository, TaskRepository taskRepository) {
         this.userRepository = userRepository;
         this.taskRepository = taskRepository;
