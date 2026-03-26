@@ -1,0 +1,42 @@
+name: Build and Push to ECR
+
+on:
+  push:
+    branches: [ "dev" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Build JAR
+        run: mvn clean package
+
+      - name: Build Docker Image
+        run: docker build -t focusframe-api .
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          region: ap-south-1
+
+      - name: Login to ECR
+        run: |
+          aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 156845521192.dkr.ecr.ap-south-1.amazonaws.com
+
+      - name: Tag Image
+        run: docker tag focusframe-api:latest 156845521192.dkr.ecr.ap-south-1.amazonaws.com/focusframe-api:latest
+
+      - name: Push to ECR
+        run: docker push 156845521192.dkr.ecr.ap-south-1.amazonaws.com/focusframe-api:latest
