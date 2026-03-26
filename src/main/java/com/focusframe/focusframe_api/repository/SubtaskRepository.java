@@ -25,6 +25,7 @@ public interface SubtaskRepository extends JpaRepository<Subtask, Integer> {
     @Query("""
         SELECT s FROM Subtask s
         WHERE s.task.user.id = :userId
+          AND s.status.id = 1
           AND s.completed = false
           AND s.startTime IS NOT NULL
           AND s.endTime IS NOT NULL
