@@ -40,3 +40,16 @@ jobs:
 
       - name: Push to ECR
         run: docker push 156845521192.dkr.ecr.ap-south-1.amazonaws.com/focusframe-api:latest
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 156845521192.dkr.ecr.ap-south-1.amazonaws.com
+            docker pull 156845521192.dkr.ecr.ap-south-1.amazonaws.com/focusframe-api:latest
+            docker stop focusframe-api || true
+            docker rm focusframe-api || true
+            docker run -d -p 8080:8080 --name focusframe-api 156845521192.dkr.ecr.ap-south-1.amazonaws.com/focusframe-api:latest
