@@ -48,8 +48,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 156845521192.dkr.ecr.ap-south-1.amazonaws.com
-            docker pull 156845521192.dkr.ecr.ap-south-1.amazonaws.com/focusframe-api:latest
-            docker stop focusframe-api || true
-            docker rm focusframe-api || true
-            docker run -d -p 8080:8080 --name focusframe-api 156845521192.dkr.ecr.ap-south-1.amazonaws.com/focusframe-api:latest
+            sudo docker pull 156845521192.dkr.ecr.ap-south-1.amazonaws.com/focusframe-api:latest
+            sudo docker stop focusframe-api || true
+            sudo docker rm focusframe-api || true
+            sudo docker run -d -p 8080:8080 --name focusframe-api 156845521192.dkr.ecr.ap-south-1.amazonaws.com/focusframe-api:latest
