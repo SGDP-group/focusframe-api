@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.security.PrivilegedAction;
 import java.time.LocalDateTime;
@@ -34,6 +35,7 @@ public class Subtask {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "task_id", nullable = false)
     @JsonBackReference
+    @ToString.Exclude
     private Task task;
     
     @Column(name = "task_order", nullable = false)

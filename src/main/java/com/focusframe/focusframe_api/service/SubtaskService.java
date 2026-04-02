@@ -6,6 +6,8 @@ import com.focusframe.focusframe_api.model.SubtaskStatus;
 import com.focusframe.focusframe_api.repository.SubtaskRepository;
 import com.focusframe.focusframe_api.repository.TaskRepository;
 import com.focusframe.focusframe_api.repository.SubtaskStatusRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -19,7 +21,9 @@ import java.time.LocalDateTime;
 
 @Service
 public class SubtaskService {
-    
+
+    private static final Logger log = LoggerFactory.getLogger(SubtaskService.class);
+
     @Autowired
     private SubtaskRepository subtaskRepository;
     
@@ -28,6 +32,9 @@ public class SubtaskService {
     
     @Autowired
     private SubtaskStatusRepository subtaskStatusRepository;
+
+    @Autowired
+    private DoorMountClient doorMountClient;
 
     @Autowired
     public SubtaskService(TaskRepository taskRepository, SubtaskStatusRepository subtaskStatusRepository, SubtaskRepository subtaskRepository) {
@@ -189,7 +196,16 @@ public class SubtaskService {
                     .orElseThrow(() -> new IllegalArgumentException("Status not found: " + statusId)));
 
         }
-        
+
+        SubtaskStatus status = subtaskStatusRepository.findById((Integer) updates.get("statusId"))
+                .orElseThrow(() -> new RuntimeException("Status not found with id: " + id));
+
+        SubtaskStatus saved = subtaskStatusRepository.save(status);
+        if ("In Progress".equals(saved.getName())) {
+            log.info("Subtask {} ('{}') status changed to Ongoing — triggering DoorMount working signal", subtask.getId(), subtask.getName());
+            doorMountClient.sendColorSignal("working", 255, 0, 0);
+        }
+        log.info("Didnt work jerk");
         return subtaskRepository.save(subtask);
     }
     
