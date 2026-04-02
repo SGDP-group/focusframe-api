@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.time.LocalDateTime;
@@ -34,7 +35,7 @@ public class SubtaskService {
     private SubtaskStatusRepository subtaskStatusRepository;
 
     @Autowired
-    private DoorMountClient doorMountClient;
+    private DoorMountLedStateService doorMountLedStateService;
 
     @Autowired
     public SubtaskService(TaskRepository taskRepository, SubtaskStatusRepository subtaskStatusRepository, SubtaskRepository subtaskRepository) {
@@ -147,6 +148,9 @@ public class SubtaskService {
     public Subtask partialUpdateSubtask(Integer id, Map<String, Object> updates) {
         Subtask subtask = subtaskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Subtask not found with id: " + id));
+
+        Integer previousStatusId = subtask.getStatus() != null ? subtask.getStatus().getId() : null;
+        Integer nextStatusId = previousStatusId;
         
         if (updates.containsKey("name")) {
             subtask.setName((String) updates.get("name"));
@@ -188,25 +192,42 @@ public class SubtaskService {
         if (updates.containsKey("isAiBreakdown")) {
             subtask.setIsAiBreakdown((Boolean) updates.get("isAiBreakdown"));
         }
-        if (updates.containsKey("statusId") && updates.get("statusId") != null) {
-            Number statusIdNum = (Number) updates.get("statusId");
+        if (updates.containsKey("statusId")) {
+            Object rawStatusId = updates.get("statusId");
+            if (rawStatusId == null) {
+                throw new IllegalArgumentException("statusId cannot be null when provided");
+            }
+            if (!(rawStatusId instanceof Number statusIdNum)) {
+                throw new IllegalArgumentException("statusId must be numeric");
+            }
+
             int statusId = statusIdNum.intValue();
-
-            subtask.setStatus(subtaskStatusRepository.findById(statusId)
-                    .orElseThrow(() -> new IllegalArgumentException("Status not found: " + statusId)));
-
+            SubtaskStatus nextStatus = subtaskStatusRepository.findById(statusId)
+                    .orElseThrow(() -> new IllegalArgumentException("Status not found: " + statusId));
+            subtask.setStatus(nextStatus);
+            nextStatusId = statusId;
         }
 
-        SubtaskStatus status = subtaskStatusRepository.findById((Integer) updates.get("statusId"))
-                .orElseThrow(() -> new RuntimeException("Status not found with id: " + id));
+        Subtask savedSubtask = subtaskRepository.save(subtask);
 
-        SubtaskStatus saved = subtaskStatusRepository.save(status);
-        if ("In Progress".equals(saved.getName())) {
-            log.info("Subtask {} ('{}') status changed to Ongoing — triggering DoorMount working signal", subtask.getId(), subtask.getName());
-            doorMountClient.sendColorSignal("working", 255, 0, 0);
+        Integer userId = null;
+        if (savedSubtask.getTask() != null && savedSubtask.getTask().getUser() != null) {
+            userId = savedSubtask.getTask().getUser().getId();
         }
-        log.info("Didnt work jerk");
-        return subtaskRepository.save(subtask);
+
+        if (userId != null && !Objects.equals(previousStatusId, nextStatusId)) {
+            String sessionId = parseOptionalSessionId(updates.get("sessionId"));
+            doorMountLedStateService.handleStatusTransition(
+                    userId,
+                    previousStatusId,
+                    nextStatusId,
+                    sessionId,
+                    savedSubtask.getId(),
+                    savedSubtask.getName()
+            );
+        }
+
+        return savedSubtask;
     }
     
     public void deleteSubtask(Integer id) {
@@ -216,6 +237,19 @@ public class SubtaskService {
     }
 
 
+
+    private String parseOptionalSessionId(Object rawSessionId) {
+        if (rawSessionId == null) {
+            return null;
+        }
+
+        String normalized = rawSessionId.toString().trim();
+        if (normalized.isEmpty()) {
+            return null;
+        }
+
+        return normalized;
+    }
 
     private LocalDateTime parseFlexibleDateTime(String dateStr) {
         if (dateStr == null) {
